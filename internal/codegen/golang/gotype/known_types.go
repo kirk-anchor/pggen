@@ -92,7 +92,7 @@ var (
 	TimeSlice     = MustParseKnownType("[]time.Time", pg.TimestamptzArray)
 	TimepSlice    = MustParseKnownType("[]*time.Time", pg.TimestamptzArray)
 	Decimal       = MustParseKnownType("github.com/shopspring/decimal.Decimal", pg.Numeric)
-	Decimalp      = MustParseKnownType("*github.com/shopspring/decimal.Decimal", pg.Numeric)
+	NullDecimal   = MustParseKnownType("github.com/shopspring/decimal.NullDecimal", pg.Numeric)
 )
 
 // pgtype types prefixed with "pg".
@@ -240,7 +240,7 @@ var knownTypesByOID = map[uint32]knownGoType{
 	pgtype.BitOID:              {PgBit, nil, nil},
 	pgtype.VarbitOID:           {PgVarbit, nil, nil},
 	pgoid.Void:                 {PgVoid, nil, nil},
-	pgtype.NumericOID:          {PgNumeric, Decimalp, Decimal},
+	pgtype.NumericOID:          {PgNumeric, NullDecimal, Decimal},
 	pgtype.RecordOID:           {PgRecord, nil, nil},
 	pgtype.UUIDOID:             {PgUUID, Stringp, String},
 	pgtype.UUIDArrayOID:        {PgUUIDArray, StringpSlice, StringSlice},

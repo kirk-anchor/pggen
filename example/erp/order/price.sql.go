@@ -36,8 +36,8 @@ FROM orders
 GROUP BY date_trunc('month', order_date);`
 
 type FindOrdersMRRRow struct {
-	Month    *time.Time       `json:"month"`
-	OrderMRR *decimal.Decimal `json:"order_mrr"`
+	Month    *time.Time          `json:"month"`
+	OrderMRR decimal.NullDecimal `json:"order_mrr"`
 }
 
 // FindOrdersMRR implements Querier.FindOrdersMRR.
