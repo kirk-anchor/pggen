@@ -161,14 +161,25 @@ func (c ConstantDeclarer) Declare(string) (string, error) { return c.str, nil }
 const typeResolverInitDecl = `// RegisterTypes should be run in config.AfterConnect to load custom types
 func RegisterTypes(ctx context.Context, conn *pgx.Conn) error {
 	pgxdecimal.Register(conn.TypeMap())
-	for _, typ := range typesToRegister {
-		dt, err := conn.LoadType(ctx, typ)
-		if err != nil {
-			return err
+	var reprocess []string
+	for ctr := len(typesToRegister); ctr > 0 && len(typesToRegister) > 0; ctr-- {
+		reprocess = nil
+		for _, typ := range typesToRegister {
+			if dt, err := conn.LoadType(ctx, typ); err == nil {
+				conn.TypeMap().RegisterType(dt)
+			} else if strings.HasPrefix(err.Error(), "unknown composite type field OID") {
+				reprocess = append(reprocess, typ)
+			} else {
+				return err
+			}
 		}
-		conn.TypeMap().RegisterType(dt)
+		typesToRegister = reprocess
 	}
-	return nil
+	var errs []error
+	for _, typ := range typesToRegister {
+		errs = append(errs, errors.New("failed to register type "+typ))
+	}
+	return errors.Join(errs...)
 }
 
 var typesToRegister = []string{}
