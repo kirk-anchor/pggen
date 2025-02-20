@@ -162,9 +162,10 @@ const typeResolverInitDecl = `// RegisterTypes should be run in config.AfterConn
 func RegisterTypes(ctx context.Context, conn *pgx.Conn) error {
 	pgxdecimal.Register(conn.TypeMap())
 	var reprocess []string
-	for ctr := len(typesToRegister); ctr > 0 && len(typesToRegister) > 0; ctr-- {
+	missing := typesToRegister
+	for ctr := len(typesToRegister); ctr > 0 && len(missing) > 0; ctr-- {
 		reprocess = nil
-		for _, typ := range typesToRegister {
+		for _, typ := range missing {
 			if dt, err := conn.LoadType(ctx, typ); err == nil {
 				conn.TypeMap().RegisterType(dt)
 			} else if strings.HasPrefix(err.Error(), "unknown composite type field OID") {
@@ -173,10 +174,10 @@ func RegisterTypes(ctx context.Context, conn *pgx.Conn) error {
 				return err
 			}
 		}
-		typesToRegister = reprocess
+		missing = reprocess
 	}
 	var errs []error
-	for _, typ := range typesToRegister {
+	for _, typ := range missing {
 		errs = append(errs, errors.New("failed to register type "+typ))
 	}
 	return errors.Join(errs...)
