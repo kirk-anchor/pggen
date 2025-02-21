@@ -158,6 +158,7 @@ func NewConstantDeclarer(key, str string) ConstantDeclarer {
 func (c ConstantDeclarer) DedupeKey() string              { return c.key }
 func (c ConstantDeclarer) Declare(string) (string, error) { return c.str, nil }
 
+// TODO: the reprocessing is a workaround, we need to match order of types in the schema instead
 const typeResolverInitDecl = `// RegisterTypes should be run in config.AfterConnect to load custom types
 func RegisterTypes(ctx context.Context, conn *pgx.Conn) error {
 	pgxdecimal.Register(conn.TypeMap())
